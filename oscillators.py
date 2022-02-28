@@ -2,7 +2,7 @@
 class Oscillators(symbol, period):
 
     def getRelativeStrengthIndex(self, data):
-        pass
+        return self.RSI(symbol, period) 
     
     def getStochasticOscillator(self, data): 
         pass
