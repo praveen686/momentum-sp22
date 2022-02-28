@@ -2,6 +2,7 @@
 class Oscillators(symbol, period):
 
     def getRelativeStrengthIndex(self, data):
+        # do i also gotta specify the moving average or resolution type
         return self.RSI(symbol, period) 
     
     def getStochasticOscillator(self, data): 
@@ -11,7 +12,7 @@ class Oscillators(symbol, period):
         pass
     
     def getMovingAverage(self, data):
-        pass
+        return self.MACD(symbol, fastPeriod, slowPeriod, signalPeriod)
     
     def getBollingerBands(self, data):
         pass
