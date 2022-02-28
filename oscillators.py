@@ -9,7 +9,7 @@ class Oscillators(symbol, period):
         pass
     
     def getRateofChange(self, data): 
-        pass
+        return self.ROC(symbol, period)
     
     def getMovingAverage(self, data):
         return self.MACD(symbol, fastPeriod, slowPeriod, signalPeriod)
