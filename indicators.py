@@ -17,6 +17,4 @@ class Indicators(symbol, period):
     
     def getVWAP(self, data):
         return self.VWAP(symbol, period)
-    
- #   Candlestick Indicators
 
