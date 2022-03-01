@@ -6,14 +6,14 @@ class Oscillators(symbol, period):
         return self.RSI(symbol, period) 
     
     def getStochasticOscillator(self, data):
-        #can also be return self.STO(symbol, period, resolution)
-        return self.STO(symbol, period, kPeriod, dPeriod, resolution)
+        # can also be return self.STO(symbol, period, kPeriod, dPeriod)
+        return self.STO(symbol, period)
     
     def getRateofChange(self, data): 
         return self.ROC(symbol, period)
     
-    def getMovingAverage(self, data):
+    def getMovingAverage(self, data, fastPeriod, slowPeriod, signalPeriod):
         return self.MACD(symbol, fastPeriod, slowPeriod, signalPeriod)
     
-    def getBollingerBands(self, data):
-        return self.BB(symbol, period, k, movingAverageType, resolution)
+    def getBollingerBands(self, data, k, movingAverageType):
+        return self.BB(symbol, period, k, movingAverageType)
