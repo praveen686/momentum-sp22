@@ -5,8 +5,9 @@ class Oscillators(symbol, period):
         # do i also gotta specify the moving average or resolution type
         return self.RSI(symbol, period) 
     
-    def getStochasticOscillator(self, data): 
-        pass
+    def getStochasticOscillator(self, data):
+        #can also be return self.STO(symbol, period, resolution)
+        return self.STO(symbol, period, kPeriod, dPeriod, resolution)
     
     def getRateofChange(self, data): 
         return self.ROC(symbol, period)
@@ -15,4 +16,4 @@ class Oscillators(symbol, period):
         return self.MACD(symbol, fastPeriod, slowPeriod, signalPeriod)
     
     def getBollingerBands(self, data):
-        pass
+        return self.BB(symbol, period, k, movingAverageType, resolution)
