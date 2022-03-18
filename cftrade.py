@@ -55,24 +55,20 @@ class ChangeFinderStart(QCAlgorithm):
         for symbol in self.symbol_list:
             #initialize changedfinder
             cf1 = cf.ChangeFinder (r = .01, order = 1, smooth = 8)
-            arr = np.array(self.history_price[str(symbol)])
-            mean = np.mean(arr)
-            std = np.std(arr)
-            for j in arr:
-                score = cf1.update(j)
-                
-            #open position when CF score is above the mean (for now)
-            if score[-1] > mean:
-                if not self.Portfolio[str(symbol)].Invested:
-                    quantity = int(self.CalculateOrderQuantity([str(symbol)], 0.2))
-                    self.Buy([str(symbol)], 100) 
-                elif self.Portfolio[[str(symbol)]].Invested:
-                    self.Liquidate([str(symbol)]) 
+            if str(symbol) in self.history_price:
+                arr = np.array(self.history_price[str(symbol)])
+                mean = np.mean(arr)
+                std = np.std(arr)
+                for j in arr:
+                    score = cf1.update(j)
+                    
+                #open position when CF score is above the mean (for now)
+                if score[-1] > mean:
+                    if not self.Portfolio[str(symbol)].Invested:
+                        quantity = int(self.CalculateOrderQuantity(str(symbol), 0.2))
+                        self.Buy(str(symbol), 100) 
+                    elif self.Portfolio[str(symbol)].Invested:
+                        self.Liquidate(str(symbol)) 
                      
-            
-            
-            
-            
-            
             
             
