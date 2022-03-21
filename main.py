@@ -19,6 +19,7 @@ class basicMomentum(QCAlgorithm):
         self.lookback = 252     # Momentum indicator lookback period
         self.num_coarse = 100   # Number of symbols selected at Coarse Selection
         self.num_fine = 50      # Number of symbols selected at Fine Selection
+        self.num_long = 5       
 
         self.month = -1
         self.rebalance = False
