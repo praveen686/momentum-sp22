@@ -54,5 +54,31 @@ class basicMomentum(QCAlgorithm):
         return [x.Symbol for x in selected[:self.num_fine]]
 
     def OnData(self, data):
-        pass
+        
+#   use multiple indicators
+#  make a weighted avg
+#  choose the top 5
+
+# Update the indicator
+        for symbol, mom in self.mom.items():
+            mom.Update(self.Time, self.Securities[symbol].Close)
+
+        if not self.rebalance:
+            return
+
+        # Selects the securities with highest momentum
+        sorted_mom = sorted([k for k,v in self.mom.items() if v.IsReady],
+            key=lambda x: self.mom[x].Current.Value, reverse=True)
+        selected = sorted_mom[:self.num_long]
+
+        # Liquidate securities that are not in the list
+        for symbol, mom in self.mom.items():
+            if symbol not in selected:
+                self.Liquidate(symbol, 'Not selected')
+
+        # Buy selected securities
+        for symbol in selected:
+            self.SetHoldings(symbol, 1/self.num_long)
+
+        self.rebalance = False
 
