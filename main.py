@@ -16,6 +16,9 @@ class basicMomentum(QCAlgorithm):
         self.UniverseSettings.Resolution = Resolution.Daily
 
         self.mom = {}           # Dict of Momentum indicator keyed by Symbol
+        self.rsi = {}           # Dict of Relative Strength Index keyed by Symbol
+        self.cci = {}           # Dict of Commodity Channel Index keyed by Symbol
+        self.best = {}          # Dict to hold best stocks keyed by Symbol
         self.lookback = 252     # Momentum indicator lookback period
         self.num_coarse = 100   # Number of symbols selected at Coarse Selection
         self.num_fine = 50      # Number of symbols selected at Fine Selection
@@ -56,30 +59,85 @@ class basicMomentum(QCAlgorithm):
 
     def OnData(self, data):
         
-#   use multiple indicators
-#  make a weighted avg
-#  choose the top 5
-
-# Update the indicator
+        #  use multiple indicators
+        #  make a weighted avg
+        #  choose the top 5
+        
+        # Update the indicator
+        
         for symbol, mom in self.mom.items():
             mom.Update(self.Time, self.Securities[symbol].Close)
-
+        
+        # manually updating the other indicators
+        # for symbol, rsi in self.rsi.items():
+        #     rsi.Update(self.Time, self.Securities[symbol].Close)
+        # for symbol, cci in self.cci.items():
+        #     cci.Update(self.Time, self.Securities[symbol].Close)
+        # #
+            
         if not self.rebalance:
             return
 
-        # Selects the securities with highest momentum
+        # Sorts the stocks by three momentum indicators
         sorted_mom = sorted([k for k,v in self.mom.items() if v.IsReady],
             key=lambda x: self.mom[x].Current.Value, reverse=True)
-        selected = sorted_mom[:self.num_long]
+        sorted_rsi = sorted([k for k,v in self.rsi.items() if v.IsReady],
+            key=lambda x: self.rsi[x].Current.Value, reverse=True)
+        sorted_cci = sorted([k for k,v in self.cci.items() if v.IsReady],
+            key=lambda x: self.cci[x].Current.Value, reverse=True)
+
+        #create weighted average
+        # for symbol, mom in self.mom.items():
+        #     best[symbol] = sorted_mom.index(symbol) + sorted_rsi.index(symbol) + sorted_cci.index(symbol)
+            
+        # other way of getting weighted avg
+        for symbol, mom in self.mom.items():
+            # best[symbol] = self.mom[symbol] + self.rsi[symbol] + self.cci[symbol] #add all the indicators together for that particular stock
+            self.best[symbol] = self.mom[symbol].Current.Value + self.rsi[symbol].Current.Value + self.cci[symbol].Current.Value # or like this?
+        #
+        
+        sorted_best = sorted([k for k,v in self.best.items()],
+                    key=lambda x: self.best[x], reverse=True)
+        selected = sorted_best[:self.num_long]
 
         # Liquidate securities that are not in the list
         for symbol, mom in self.mom.items():
             if symbol not in selected:
-                self.Liquidate(symbol, 'Not selected')
-
+                self.Liquidate(symbol, 'Not selected')            
+                
         # Buy selected securities
         for symbol in selected:
             self.SetHoldings(symbol, 1/self.num_long)
 
         self.rebalance = False
 
+    def OnSecuritiesChanged(self, changes):
+
+             # Clean up data for removed securities and Liquidate
+             for security in changes.RemovedSecurities:
+                 symbol = security.Symbol
+                 if self.mom.pop(symbol, None) is not None:
+                     self.Liquidate(symbol, 'Removed from universe')
+
+             for security in changes.AddedSecurities:
+                 if security.Symbol not in self.mom:
+                     self.mom[security.Symbol] = Momentum(self.lookback)
+                 if security.Symbol not in self.rsi:
+                     self.rsi[security.Symbol] = self.RSI(security.Symbol, self.lookback)
+                 if security.Symbol not in self.cci:
+                     self.cci[security.Symbol] = self.CCI(security.Symbol, self.lookback)
+
+             # Warm up the indicator with history price if it is not ready
+             addedSymbols = [k for k,v in self.mom.items() if not v.IsReady]
+
+             history = self.History(addedSymbols, 1 + self.lookback, Resolution.Daily)
+             history = history.close.unstack(level=0)
+
+             for symbol in addedSymbols:
+                 ticker = str(symbol)
+                 if ticker in history:
+                     for time, value in history[ticker].items():
+                         item = IndicatorDataPoint(symbol, time, value)
+                         self.mom[symbol].Update(item)
+                         self.rsi[symbol].Update(item)
+                        #  self.cci[symbol].Update(item)
