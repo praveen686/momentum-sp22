@@ -18,6 +18,7 @@ class basicMomentum(QCAlgorithm):
         self.mom = {}           # Dict of Momentum indicator keyed by Symbol
         self.rsi = {}           # Dict of Relative Strength Index keyed by Symbol
         self.cci = {}           # Dict of Commodity Channel Index keyed by Symbol
+        self.vol = {}           # using volume :)
         self.best = {}          # Dict to hold best stocks keyed by Symbol
         self.lookback = 252     # Momentum indicator lookback period
         self.num_coarse = 100   # Number of symbols selected at Coarse Selection
@@ -79,12 +80,14 @@ class basicMomentum(QCAlgorithm):
             return
 
         # Sorts the stocks by three momentum indicators
-        sorted_mom = sorted([k for k,v in self.mom.items() if v.IsReady],
-            key=lambda x: self.mom[x].Current.Value, reverse=True)
-        sorted_rsi = sorted([k for k,v in self.rsi.items() if v.IsReady],
-            key=lambda x: self.rsi[x].Current.Value, reverse=True)
-        sorted_cci = sorted([k for k,v in self.cci.items() if v.IsReady],
-            key=lambda x: self.cci[x].Current.Value, reverse=True)
+        # sorted_mom = sorted([k for k,v in self.mom.items() if v.IsReady],
+        #     key=lambda x: self.mom[x].Current.Value, reverse=True)
+        # sorted_rsi = sorted([k for k,v in self.rsi.items() if v.IsReady],
+        #     key=lambda x: self.rsi[x].Current.Value, reverse=True)
+        # sorted_cci = sorted([k for k,v in self.cci.items() if v.IsReady],
+        #     key=lambda x: self.cci[x].Current.Value, reverse=True)
+        # sorted_vol = sorted([k for k,v in self.vol.items() if v.IsReady],
+        #     key=lambda x: self.vol[x].Current.Value, reverse=True)
 
         #create weighted average
         # for symbol, mom in self.mom.items():
@@ -93,7 +96,7 @@ class basicMomentum(QCAlgorithm):
         # other way of getting weighted avg
         for symbol, mom in self.mom.items():
             # best[symbol] = self.mom[symbol] + self.rsi[symbol] + self.cci[symbol] #add all the indicators together for that particular stock
-            self.best[symbol] = self.mom[symbol].Current.Value + self.rsi[symbol].Current.Value + self.cci[symbol].Current.Value # or like this?
+            self.best[symbol] = self.mom[symbol].Current.Value + self.rsi[symbol].Current.Value + self.cci[symbol].Current.Value + self.vol[symbol].Current.Value
         #
         
         sorted_best = sorted([k for k,v in self.best.items()],
@@ -126,6 +129,8 @@ class basicMomentum(QCAlgorithm):
                      self.rsi[security.Symbol] = self.RSI(security.Symbol, self.lookback)
                  if security.Symbol not in self.cci:
                      self.cci[security.Symbol] = self.CCI(security.Symbol, self.lookback)
+                 if security.Symbol not in self.vol:
+                     self.vol[security.Symbol] = self.VWAP(security.Symbol, self.lookback)
 
              # Warm up the indicator with history price if it is not ready
              addedSymbols = [k for k,v in self.mom.items() if not v.IsReady]
@@ -140,4 +145,5 @@ class basicMomentum(QCAlgorithm):
                          item = IndicatorDataPoint(symbol, time, value)
                          self.mom[symbol].Update(item)
                          self.rsi[symbol].Update(item)
+                        #  self.vol[symbol].Update(item)
                         #  self.cci[symbol].Update(item)
