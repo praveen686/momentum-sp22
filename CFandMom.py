@@ -141,7 +141,11 @@ class basicMomentum(QCAlgorithm):
             else:
                 ret1.append(0)
             # best[symbol] = self.mom[symbol] + self.rsi[symbol] + self.cci[symbol] #add all the indicators together for that particular stock
-            self.best[symbol] = ret1[-1] + self.mom[symbol].Current.Value + self.rsi[symbol].Current.Value + self.cci[symbol].Current.Value + self.vol[symbol].Current.Value
+            test = self.mom[symbol].Current.Value + self.rsi[symbol].Current.Value + self.cci[symbol].Current.Value + self.vol[symbol].Current.Value
+            if ret1[-1] == 0:
+                self.best[symbol] = test + ret1[-1]
+            else:
+                self.best[symbol] = test + ret1[-1][-1]
         #
         
         sorted_best = sorted([k for k,v in self.best.items()],
