@@ -151,15 +151,17 @@ class basicMomentum(QCAlgorithm):
         sorted_best = sorted([k for k,v in self.best.items()],
                     key=lambda x: self.best[x], reverse=True)
         selected = sorted_best[:self.num_long]
-
+        
         # Liquidate securities that are not in the list
         for symbol, mom in self.mom.items():
             if symbol not in selected:
-                self.Liquidate(symbol, 'Not selected')            
+                if self.Securities[symbol].IsTradable and data.ContainsKey(symbol) and data[symbol] is not None:
+                    self.Liquidate(symbol, 'Not selected')            
                 
         # Buy selected securities
         for symbol in selected:
-            self.SetHoldings(symbol, 1/self.num_long)
+            if self.Securities[symbol].IsTradable and data.ContainsKey(symbol) and data[symbol] is not None:
+                self.SetHoldings(symbol, 1/self.num_long)
 
         self.rebalance = False
 
