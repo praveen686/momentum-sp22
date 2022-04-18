@@ -106,11 +106,13 @@ class basicMomentum(QCAlgorithm):
         # Liquidate securities that are not in the list
         for symbol, mom in self.mom.items():
             if symbol not in selected:
-                self.Liquidate(symbol, 'Not selected')            
+                if self.Securities[symbol].IsTradable and data.ContainsKey(symbol) and data[symbol] is not None:
+                    self.Liquidate(symbol, 'Not selected')            
                 
         # Buy selected securities
         for symbol in selected:
-            self.SetHoldings(symbol, 1/self.num_long)
+            if self.Securities[symbol].IsTradable and data.ContainsKey(symbol) and data[symbol] is not None:
+                self.SetHoldings(symbol, 1/self.num_long)
 
         self.rebalance = False
 
