@@ -187,7 +187,9 @@ class basicMomentum(QCAlgorithm):
              addedSymbols = [k for k,v in self.mom.items() if not v.IsReady]
 
              history = self.History(addedSymbols, 1 + self.lookback, Resolution.Daily)
-             history = history.close.unstack(level=0)
+             if 'close' in history.columns:
+                history = history['close'].unstack(level=0)
+
 
              for symbol in addedSymbols:
                  ticker = str(symbol)
